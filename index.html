@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Server Minecraft</title>
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Google Fonts (Press Start 2P) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Menggunakan font pixel dan beberapa style kustom */
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a202c;
+            /* Animasi latar belakang */
+            background-image: linear-gradient(45deg, #111827 25%, transparent 25%),
+                              linear-gradient(-45deg, #111827 25%, transparent 25%),
+                              linear-gradient(45deg, transparent 75%, #111827 75%),
+                              linear-gradient(-45deg, transparent 75%, #111827 75%);
+            background-size: 20px 20px;
+            background-position: 0 0;
+            animation: background-scroll 4s linear infinite;
+            /* Mencegah blur pada font pixel */
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            image-rendering: pixelated;
+        }
+
+        /* Keyframes untuk animasi */
+        @keyframes background-scroll {
+            from { background-position: 0 0; }
+            to { background-position: -20px -20px; }
+        }
+
+        @keyframes text-flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow:
+                    0 0 5px #fff,
+                    0 0 10px #fff,
+                    0 0 20px #0ff,
+                    0 0 40px #0ff,
+                    0 0 60px #0ff;
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+                opacity: 0.8;
+            }
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 8px 2px rgba(74, 222, 128, 0.7); }
+            50% { box-shadow: 0 0 12px 4px rgba(74, 222, 128, 0.4); }
+        }
+
+        /* Class untuk animasi */
+        .animate-text-flicker {
+            animation: text-flicker 4s linear infinite;
+        }
+        .animate-pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+
+        /* Style untuk border pixelated */
+        .pixel-border {
+            border: 4px solid #4a5568;
+            box-shadow: inset 0 0 0 4px #1a202c;
+        }
+
+        /* Style untuk tombol pixelated */
+        .pixel-button {
+            background-color: #4a5568;
+            border: 4px solid #2d3748;
+            color: white;
+            text-shadow: 2px 2px #1a202c;
+            box-shadow: 4px 4px 0px #1a202c;
+            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+            transform: translate(0, 0);
+        }
+        .pixel-button:hover {
+            background-color: #718096;
+        }
+        .pixel-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px #1a202c;
+        }
+    </style>
+</head>
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <div class="w-full max-w-4xl">
+        <!-- Header Utama -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl text-cyan-300 animate-text-flicker" style="line-height: 1.4;">Status Server</h1>
+            <p class="text-xs text-gray-400 mt-2">Netral Team Server</p>
+        </div>
+
+        <!-- Grid untuk menampung kedua server -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Server 1: Bedrock Edition -->
+            <div class="bg-gray-800 p-6 sm:p-8 pixel-border h-full flex flex-col">
+                <h2 class="text-center text-lg text-green-400 mb-4">Bedrock Edition</h2>
+                
+                <!-- Kotak Status Utama -->
+                <div id="status-card-bedrock" class="bg-gray-900 p-5 text-center transition-all duration-500 pixel-border flex-grow">
+                    <!-- Indikator Loading Awal -->
+                    <div id="loading-indicator-bedrock">
+                        <p class="text-sm sm:text-base text-gray-300">CHECKING...</p>
+                        <div class="mt-4 h-4 bg-gray-700 pixel-border overflow-hidden">
+                            <div class="bg-cyan-500 w-full h-full animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <!-- Konten Status (ditampilkan setelah loading) -->
+                    <div id="status-content-bedrock" class="hidden">
+                        <div class="flex items-center justify-center gap-3 mb-4">
+                            <div id="status-dot-bedrock" class="w-4 h-4" style="border: 2px solid #1a202c;"></div>
+                            <p id="status-text-bedrock" class="text-lg sm:text-xl font-bold"></p>
+                        </div>
+                        <p id="player-count-bedrock" class="text-gray-300 text-sm sm:text-base"></p>
+                    </div>
+                </div>
+
+                <!-- Informasi Server -->
+                <div class="mt-6 text-center bg-gray-900 pixel-border p-4">
+                    <p class="text-gray-400 text-xs sm:text-sm">Server Address:</p>
+                    <p id="server-address-bedrock" class="text-cyan-300 rounded-md pt-2 mt-1 text-xs sm:text-sm break-words"></p>
+                </div>
+            </div>
+
+            <!-- Server 2: Java Edition -->
+            <div class="bg-gray-800 p-6 sm:p-8 pixel-border h-full flex flex-col opacity-75">
+                <h2 class="text-center text-lg text-yellow-400 mb-4">Java Edition</h2>
+                
+                <!-- Kotak Status Utama -->
+                <div class="bg-gray-900 p-5 text-center pixel-border flex-grow flex items-center justify-center">
+                    <div>
+                        <p class="text-xl sm:text-2xl text-yellow-300">COMING SOON</p>
+                        <p class="text-gray-400 text-xs mt-2">Server sedang disiapkan!</p>
+                    </div>
+                </div>
+
+                <!-- Informasi Server -->
+                <div class="mt-6 text-center bg-gray-900 pixel-border p-4">
+                    <p class="text-gray-400 text-xs sm:text-sm">Server Address:</p>
+                    <p class="text-gray-500 pt-2 mt-1 text-xs sm:text-sm">- TBD -</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Umum -->
+        <div class="text-center mt-8">
+            <!-- Info Kontak -->
+            <div class="mb-8 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                <h3 class="text-cyan-300 text-sm sm:text-base mb-2">Info</h3>
+                <p><span class="text-gray-500">Server Owner:</span> Mizae</p>
+                <p><span class="text-gray-500">Admin:</span> yanntzy4568</p>
+            </div>
+
+            <button id="refresh-button" class="pixel-button py-3 px-6 text-sm">
+                REFRESH COY
+            </button>
+            <p id="last-updated" class="text-xs text-gray-500 mt-4" style="font-size: 10px;">...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- PENGATURAN BEDROCK ---
+        const SERVER_ADDRESS_BEDROCK = "mm-pete.gl.at.ply.gg:10906"; 
+        const IS_MAINTENANCE_BEDROCK = false;
+        // --- AKHIR PENGATURAN ---
+
+        // Elemen-elemen khusus untuk Bedrock
+        const statusCard = document.getElementById('status-card-bedrock');
+        const loadingIndicator = document.getElementById('loading-indicator-bedrock');
+        const statusContent = document.getElementById('status-content-bedrock');
+        const statusDot = document.getElementById('status-dot-bedrock');
+        const statusText = document.getElementById('status-text-bedrock');
+        const playerCount = document.getElementById('player-count-bedrock');
+        const serverAddressElement = document.getElementById('server-address-bedrock');
+        const lastUpdatedElement = document.getElementById('last-updated');
+        const refreshButton = document.getElementById('refresh-button');
+        
+        serverAddressElement.textContent = SERVER_ADDRESS_BEDROCK;
+
+        async function fetchServerStatus() {
+            loadingIndicator.style.display = 'block';
+            statusContent.style.display = 'none';
+            statusCard.style.backgroundColor = '#1f2937'; // bg-gray-900
+
+            if (IS_MAINTENANCE_BEDROCK) {
+                updateStatus('maintenance');
+                return;
+            }
+
+            const apiUrl = `https://api.mcsrvstat.us/bedrock/3/${SERVER_ADDRESS_BEDROCK}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) { throw new Error(`API Error: ${response.statusText}`); }
+                const data = await response.json();
+                updateStatus(data.online ? 'online' : 'offline', data.players);
+            } catch (error) {
+                console.error("Gagal mengambil status server Bedrock:", error);
+                updateStatus('error');
+            }
+        }
+
+        function updateStatus(status, players) {
+            loadingIndicator.style.display = 'none';
+            statusContent.style.display = 'block';
+
+            statusDot.classList.remove('bg-green-400', 'bg-red-500', 'bg-yellow-400', 'bg-gray-500', 'animate-pulse-green');
+            
+            let statusMessage = '';
+            let playerMessage = '';
+            let cardColor = '#1f2937'; // bg-gray-900
+            let textColor = 'text-white';
+
+            switch (status) {
+                case 'online':
+                    cardColor = '#14532d'; // bg-green-900
+                    statusDot.classList.add('bg-green-400', 'animate-pulse-green');
+                    statusMessage = 'ONLINE';
+                    textColor = 'text-green-300';
+                    playerMessage = `PLAYERS: ${players.online} / ${players.max}`;
+                    break;
+                case 'offline':
+                    cardColor = '#7f1d1d'; // bg-red-900
+                    statusDot.classList.add('bg-red-500');
+                    statusMessage = 'OFFLINE';
+                    textColor = 'text-red-300';
+                    playerMessage = 'Server is not active.';
+                    break;
+                case 'maintenance':
+                    cardColor = '#78350f'; // bg-yellow-900
+                    statusDot.classList.add('bg-yellow-400');
+                    statusMessage = 'MAINTENANCE';
+                    textColor = 'text-yellow-300';
+                    playerMessage = 'Server is under repair.';
+                    break;
+                case 'error':
+                default:
+                    statusDot.classList.add('bg-gray-500');
+                    statusMessage = 'ERROR';
+                    textColor = 'text-gray-400';
+                    playerMessage = 'Failed to check status.';
+                    break;
+            }
+
+            statusCard.style.backgroundColor = cardColor;
+            statusText.textContent = statusMessage;
+            statusText.className = `text-lg sm:text-xl font-bold ${textColor}`;
+            playerCount.textContent = playerMessage;
+            
+            const now = new Date();
+            lastUpdatedElement.textContent = `Bedrock status updated: ${now.toLocaleTimeString('id-ID')}`;
+        }
+
+        refreshButton.addEventListener('click', fetchServerStatus);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchServerStatus();
+            setInterval(fetchServerStatus, 30000);
+        });
+    </script>
+</body>
+</html>
